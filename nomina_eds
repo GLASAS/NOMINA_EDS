@@ -1,0 +1,2878 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#0284c7" />
+  <title>Calendario Anual de Turnos Rotativos (DD-NN-RR)</title>
+  <style>
+    :root {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-muted: #f1f5f9;
+      --border-light: #e2e8f0;
+      --border-med: #cbd5e1;
+      --text-main: #0f172a;
+      --text-sec: #475569;
+      --text-muted: #64748b;
+      --sky-600: #0284c7;
+      --sky-700: #0369a1;
+      --sky-100: #e0f2fe;
+      --sky-50: #f0f9ff;
+      --indigo-600: #4f46e5;
+      --indigo-100: #e0e7ff;
+      --emerald-600: #059669;
+      --emerald-100: #d1fae5;
+      --amber-500: #f59e0b;
+      --amber-600: #d97706;
+      --amber-100: #fef3c7;
+      --purple-600: #9333ea;
+      --purple-100: #f3e8ff;
+      --rose-600: #e11d48;
+      --rose-100: #ffe4e6;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.4;
+      padding-bottom: calc(24px + var(--safe-bottom));
+      -webkit-text-size-adjust: 100%;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      touch-action: manipulation;
+    }
+
+    @media screen and (max-width: 768px) {
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* Header */
+    .app-header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-light);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      padding-top: var(--safe-top);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    .header-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--sky-600);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+
+    .brand-title span {
+      color: var(--sky-600);
+    }
+
+    .pill-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--sky-50);
+      color: var(--sky-700);
+      border: 1px solid #bae6fd;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Botones */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background-color 0.15s, transform 0.05s;
+      white-space: nowrap;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-sky { background: var(--sky-600); color: #fff; }
+    .btn-sky:hover { background: var(--sky-700); }
+
+    .btn-amber { background: var(--amber-500); color: #fff; }
+    .btn-amber:hover { background: var(--amber-600); }
+
+    .btn-emerald { background: var(--emerald-600); color: #fff; }
+    .btn-emerald:hover { background: #047857; }
+
+    .btn-dark { background: #1e293b; color: #fff; }
+    .btn-dark:hover { background: #0f172a; }
+
+    .btn-rose-soft { background: #fff1f2; color: var(--rose-600); border-color: #fecdd3; }
+    .btn-rose-soft:hover { background: var(--rose-100); }
+
+    .btn-ghost { background: #fff; color: var(--text-sec); border-color: var(--border-med); }
+    .btn-ghost:hover { background: var(--bg-muted); }
+
+    /* Main Layout */
+    .main-content {
+      padding-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Panel de Controles */
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      align-items: end;
+    }
+
+    @media (max-width: 1024px) {
+      .controls-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .controls-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .control-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .stepper-box {
+      display: flex;
+      align-items: center;
+      background: var(--bg-page);
+      border: 1px solid var(--border-med);
+      border-radius: 12px;
+      padding: 3px;
+      height: 42px;
+    }
+
+    .stepper-btn {
+      width: 36px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border-light);
+      background: #fff;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stepper-btn:hover { background: var(--bg-muted); }
+
+    .stepper-input {
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .month-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-arrow {
+      width: 38px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid var(--border-med);
+      background: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .nav-arrow:hover { background: var(--bg-muted); }
+
+    .field-select, .field-input {
+      width: 100%;
+      height: 42px;
+      padding: 0 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border-med);
+      background: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .field-select:focus, .field-input:focus {
+      border-color: var(--sky-600);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    .tabs-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: var(--bg-muted);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 3px;
+      height: 42px;
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-sec);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .tab-btn.active {
+      background: #fff;
+      color: var(--text-main);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    }
+
+    .badge-count {
+      background: var(--amber-500);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 999px;
+    }
+
+    /* Barra secundaria: Fecha de corte y Convenciones */
+    .sub-bar {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 12px;
+    }
+
+    .cutoff-box {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      background: var(--sky-50);
+      border: 1px solid #bae6fd;
+      padding: 6px 12px;
+      border-radius: 12px;
+    }
+
+    .dot-pulse {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--sky-600);
+      display: inline-block;
+    }
+
+    .cutoff-date-input {
+      height: 32px;
+      padding: 0 8px;
+      border-radius: 8px;
+      border: 1px solid #7dd3fc;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .btn-mini {
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid #7dd3fc;
+      background: #fff;
+      color: var(--sky-700);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-mini:hover { background: var(--sky-100); }
+
+    .legend-list {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .leg-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 9px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .leg-d { background: var(--sky-100); color: #0c4a6e; border-color: #bae6fd; }
+    .leg-n { background: var(--indigo-100); color: #312e81; border-color: #c7d2fe; }
+    .leg-r { background: var(--emerald-100); color: #064e3b; border-color: #a7f3d0; }
+    .leg-p { background: var(--amber-100); color: #78350f; border-color: #fde68a; }
+    .leg-s { background: var(--purple-100); color: #581c87; border-color: #e9d5ff; }
+
+    /* Tabla Sábana Mensual */
+    .sheet-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+
+    .sheet-banner {
+      background: #0f172a;
+      color: #fff;
+      padding: 14px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .sheet-banner h2 {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .sheet-banner h2 span {
+      color: #38bdf8;
+    }
+
+    .sheet-banner p {
+      font-size: 12px;
+      color: #cbd5e1;
+      margin-top: 2px;
+    }
+
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .sheet-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+    }
+
+    .sheet-table th, .sheet-table td {
+      border-bottom: 1px solid var(--border-light);
+      border-right: 1px solid var(--border-light);
+    }
+
+    .sticky-col {
+      position: -webkit-sticky;
+      position: sticky;
+      left: 0;
+      z-index: 12;
+      background: #fff;
+      min-width: 215px;
+      max-width: 230px;
+      padding: 10px 14px;
+      border-right: 1px solid var(--border-med) !important;
+      box-shadow: 2px 0 6px rgba(15, 23, 42, 0.05);
+    }
+
+    .sheet-table thead .sticky-col {
+      z-index: 20;
+      background: var(--bg-muted);
+      font-weight: 800;
+      color: var(--text-sec);
+    }
+
+    .day-th {
+      min-width: 58px;
+      padding: 7px 4px;
+      text-align: center;
+      background: var(--bg-muted);
+      color: var(--text-sec);
+    }
+
+    .day-th.weekend {
+      background: #fff1f2;
+      color: #be123c;
+    }
+
+    .day-th.is-today {
+      background: var(--sky-600) !important;
+      color: #fff !important;
+    }
+
+    .day-th.is-future {
+      opacity: 0.72;
+    }
+
+    .day-th-name {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .day-th-num {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .staff-name-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .staff-name-txt {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .role-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+    }
+
+    .role-titular { background: var(--sky-100); color: var(--sky-700); }
+    .role-suplente { background: var(--purple-100); color: #6b21a8; }
+
+    .inline-controls {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 6px;
+    }
+
+    .mini-date {
+      height: 27px;
+      padding: 0 5px;
+      border-radius: 7px;
+      border: 1px solid var(--border-med);
+      background: var(--bg-page);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-main);
+      width: 118px;
+    }
+
+    .mini-seed {
+      height: 27px;
+      padding: 0 5px;
+      border-radius: 7px;
+      border: 1px solid #7dd3fc;
+      background: var(--sky-50);
+      font-size: 11px;
+      font-weight: 800;
+      color: #0369a1;
+      cursor: pointer;
+    }
+
+    .day-cell {
+      padding: 6px 4px;
+      text-align: center;
+      vertical-align: middle;
+      cursor: pointer;
+      transition: background-color 0.12s;
+      user-select: none;
+    }
+
+    .day-cell:hover {
+      background-color: #f0f9ff;
+    }
+
+    .day-cell.is-today {
+      background-color: rgba(2, 132, 199, 0.08);
+      box-shadow: inset 0 0 0 2px var(--sky-600);
+    }
+
+    .day-cell.is-future {
+      opacity: 0.56;
+    }
+
+    .shift-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 30px;
+      height: 25px;
+      padding: 0 6px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid transparent;
+    }
+
+    .pill-d { background: var(--sky-100); color: #0c4a6e; border-color: #7dd3fc; }
+    .pill-n { background: var(--indigo-600); color: #fff; border-color: #4338ca; }
+    .pill-r { background: var(--emerald-100); color: #065f46; border-color: #6ee7b7; }
+    .pill-free { background: #fff; color: #94a3b8; border: 1px dashed var(--border-med); }
+    .pill-abs-cov { background: var(--amber-100); color: #78350f; border-color: #f59e0b; text-decoration: line-through; }
+    .pill-abs-uncov { background: var(--rose-100); color: #881337; border-color: #fb7185; text-decoration: line-through; }
+    .pill-sup { background: var(--purple-600); color: #fff; border-color: #7e22ce; }
+
+    .cell-sub {
+      font-size: 9px;
+      font-weight: 700;
+      margin-top: 2px;
+      max-width: 56px;
+      margin-left: auto;
+      margin-right: auto;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-muted);
+    }
+
+    /* Tarjetas Inferiores de Resumen por Funcionario */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 1024px) {
+      .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .summary-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .card-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .card-period-tag {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .tag-cutoff { background: var(--sky-100); color: #0369a1; }
+    .tag-closed { background: var(--emerald-100); color: #065f46; }
+    .tag-future { background: var(--bg-muted); color: var(--text-sec); }
+
+    .metrics-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+    }
+
+    .metric-box {
+      padding: 8px 4px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+    }
+
+    .m-d { background: #f0f9ff; border-color: #e0f2fe; color: #0369a1; }
+    .m-n { background: #eef2ff; border-color: #e0e7ff; color: #3730a3; }
+    .m-r { background: #ecfdf5; border-color: #d1fae5; color: #065f46; }
+    .m-p { background: #fffbeb; border-color: #fef3c7; color: #92400e; }
+
+    .metric-lbl {
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .metric-val {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-top: 2px;
+    }
+
+    .card-footer-line {
+      padding-top: 8px;
+      border-top: 1px dashed var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-sec);
+    }
+
+    /* Vista 12 Meses */
+    .annual-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 1024px) {
+      .annual-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 640px) {
+      .annual-grid { grid-template-columns: 1fr; }
+    }
+
+    .month-card {
+      background: #fff;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .month-card-head {
+      background: #0f172a;
+      color: #fff;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .month-card-body {
+      max-height: 380px;
+      overflow-y: auto;
+    }
+
+    .annual-day-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 12px;
+    }
+
+    .annual-day-row.weekend { background: #fafafa; }
+
+    .annual-pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 4px;
+    }
+
+    .mini-chip {
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+
+    /* Tablas Bitácora y Reportes */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    .data-table th {
+      background: var(--bg-muted);
+      color: var(--text-sec);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-med);
+    }
+
+    .data-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    /* Modales */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 18px;
+      width: 100%;
+      max-width: 760px;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.25);
+    }
+
+    .modal-box.sm { max-width: 520px; }
+    .modal-box.lg { max-width: 920px; }
+
+    .modal-head {
+      background: #0f172a;
+      color: #fff;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-close {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: none;
+      background: #1e293b;
+      color: #e2e8f0;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .modal-body {
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-card {
+      background: var(--bg-page);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .form-row-2, .form-row-3 { grid-template-columns: 1fr; }
+    }
+
+    .hidden { display: none !important; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      right: 16px;
+      bottom: calc(16px + var(--safe-bottom));
+      background: #0f172a;
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 10px 15px rgba(15, 23, 42, 0.25);
+      z-index: 60;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .toast.hide {
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+    }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #fff; }
+      .annual-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado Superior -->
+  <header class="app-header">
+    <div class="container header-inner">
+      <div class="brand-group">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title-row">
+            <h1 class="brand-title">Calendario de Turnos <span id="headerYearText">2026</span></h1>
+            <span class="pill-tag">Titulares Automáticos (DD-NN-RR) + Suplentes Manuales</span>
+          </div>
+          <p class="brand-sub">
+            Fórmula Excel activa: DD→N | DN→N | NN→R | NR→R | RR→D | RD→D • NOMPROPIO(DDDD) • <strong id="leapYearText">Año estándar (365 días)</strong>
+          </p>
+        </div>
+      </div>
+
+      <div class="header-actions no-print">
+        <button id="btnOpenStaff" type="button" class="btn btn-sky">
+          Funcionarios (<span id="staffTotalBadge">4</span>)
+        </button>
+        <button id="btnOpenNovelty" type="button" class="btn btn-amber">
+          + Permiso / Suplente
+        </button>
+        <button id="btnOpenPayroll" type="button" class="btn btn-emerald">
+          📊 Reporte Nómina (CSV)
+        </button>
+        <button id="btnPrint" type="button" class="btn btn-dark">
+          Imprimir
+        </button>
+        <button id="btnResetAll" type="button" class="btn btn-rose-soft">
+          Reiniciar Datos
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+
+    <!-- Panel de Controles -->
+    <section class="panel no-print">
+      <div class="controls-grid">
+        <!-- 1. Año -->
+        <div>
+          <label for="inputYear" class="control-label">1. Año del Calendario</label>
+          <div class="stepper-box">
+            <button id="btnYearDec" type="button" class="stepper-btn" aria-label="Año anterior">−</button>
+            <input id="inputYear" type="number" min="1900" max="2200" value="2026" class="stepper-input" />
+            <button id="btnYearInc" type="button" class="stepper-btn" aria-label="Año siguiente">+</button>
+          </div>
+        </div>
+
+        <!-- 2. Mes -->
+        <div>
+          <label for="selectMonth" class="control-label">2. Mes (Vista Sábana Mensual)</label>
+          <div class="month-row">
+            <button id="btnMonthDec" type="button" class="nav-arrow" aria-label="Mes anterior">&lt;</button>
+            <select id="selectMonth" class="field-select">
+              <option value="0">Enero</option>
+              <option value="1">Febrero</option>
+              <option value="2">Marzo</option>
+              <option value="3">Abril</option>
+              <option value="4">Mayo</option>
+              <option value="5">Junio</option>
+              <option value="6">Julio</option>
+              <option value="7">Agosto</option>
+              <option value="8">Septiembre</option>
+              <option value="9">Octubre</option>
+              <option value="10" selected>Noviembre</option>
+              <option value="11">Diciembre</option>
+            </select>
+            <button id="btnMonthInc" type="button" class="nav-arrow" aria-label="Mes siguiente">&gt;</button>
+          </div>
+        </div>
+
+        <!-- 3. Filtrar Funcionario -->
+        <div>
+          <label for="selectStaffFilter" class="control-label">3. Filtrar Funcionario</label>
+          <select id="selectStaffFilter" class="field-select">
+            <option value="ALL">Todos los funcionarios (4)</option>
+          </select>
+        </div>
+
+        <!-- 4. Vista del Calendario -->
+        <div>
+          <label class="control-label">4. Vista del Calendario</label>
+          <div class="tabs-bar">
+            <button id="tabSheet" type="button" class="tab-btn active">Sábana Mes</button>
+            <button id="tabAnnual" type="button" class="tab-btn">12 Meses</button>
+            <button id="tabLog" type="button" class="tab-btn">
+              Novedades <span id="logCounterBadge" class="badge-count">0</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra secundaria: Fecha de Corte ("A hoy") y Convenciones -->
+      <div class="sub-bar">
+        <div class="cutoff-box">
+          <span class="dot-pulse"></span>
+          <strong>Fecha de Corte ("A hoy"):</strong>
+          <input id="inputCutoffDate" type="date" value="2026-11-25" class="cutoff-date-input" />
+          <button id="btnSetCutoffToday" type="button" class="btn-mini">Hoy</button>
+          <span id="cutoffLegendText" style="color:#0369a1;font-weight:600;">Mostrando acumulado real al 2026-11-25</span>
+        </div>
+
+        <div class="legend-list">
+          <span class="leg-item leg-d">D = Día</span>
+          <span class="leg-item leg-n">N = Noche</span>
+          <span class="leg-item leg-r">R = Descanso</span>
+          <span class="leg-item leg-p">Permiso / Vacaciones Titular</span>
+          <span class="leg-item leg-s">Cobertura / Turno Manual Suplente</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA 1: SÁBANA MENSUAL -->
+    <section id="viewSheet" style="display:flex;flex-direction:column;gap:18px;">
+      <div class="sheet-card">
+        <div class="sheet-banner">
+          <div>
+            <h2>Programación Mensual: <span id="bannerMonthYear">Noviembre 2026</span></h2>
+            <p>Regla: DD→N | DN→N | NN→R | NR→R | RR→D | RD→D • NOMPROPIO(DDDD) • Proyección continua hacia atrás y adelante</p>
+          </div>
+          <div style="font-size:12px;color:#cbd5e1;font-weight:600;">
+            Edita inicio/semilla a la izquierda o haz clic en cualquier celda
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table id="sheetTable" class="sheet-table"></table>
+        </div>
+      </div>
+
+      <!-- Tarjetas Inferiores de Resumen -->
+      <div id="summaryCardsGrid" class="cards-grid"></div>
+    </section>
+
+    <!-- VISTA 2: CALENDARIO ANUAL 12 MESES -->
+    <section id="viewAnnual" class="hidden">
+      <div id="annualMonthsContainer" class="annual-grid"></div>
+    </section>
+
+    <!-- VISTA 3: BITÁCORA DE NOVEDADES -->
+    <section id="viewLog" class="hidden">
+      <div class="sheet-card">
+        <div class="sheet-banner">
+          <div>
+            <h2>Bitácora de Novedades, Permisos y Suplencias</h2>
+            <p>Historial completo de ausencias, vacaciones, incapacidades y coberturas manuales</p>
+          </div>
+          <button id="btnLogAddNovelty" type="button" class="btn btn-amber no-print">+ Registrar Novedad</button>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Día (Nompropio)</th>
+                <th>Funcionario</th>
+                <th>Turno Base</th>
+                <th>Tipo Novedad</th>
+                <th>Suplente / Turno Asignado</th>
+                <th>Observación</th>
+                <th class="no-print">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="logTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL 1: GESTIÓN DE FUNCIONARIOS -->
+  <div id="modalStaff" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div>
+          <h3 style="font-size:16px;font-weight:800;">Gestión de Funcionarios (Titulares y Suplentes)</h3>
+          <p style="font-size:12px;color:#cbd5e1;">Los titulares calculan todo el año automáticamente; los suplentes operan de forma manual.</p>
+        </div>
+        <button id="btnCloseStaff" type="button" class="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="formStaff" class="form-card">
+          <input type="hidden" id="staffEditId" value="" />
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong id="staffFormHeading" style="font-size:12px;color:#0369a1;text-transform:uppercase;">+ Agregar Nuevo Funcionario</strong>
+            <button id="btnCancelStaffEdit" type="button" class="btn-mini hidden">Cancelar edición</button>
+          </div>
+          <div class="form-row-2">
+            <div>
+              <label class="control-label">Nombre *</label>
+              <input id="staffNameInp" type="text" required placeholder="Ej. Danilo, Vicente..." class="field-input" />
+            </div>
+            <div>
+              <label class="control-label">Rol *</label>
+              <select id="staffRoleInp" class="field-select">
+                <option value="titular">Titular (Ciclo DD-NN-RR Automático)</option>
+                <option value="suplente">Suplente (100% Manual)</option>
+              </select>
+            </div>
+          </div>
+          <div id="staffCycleFields" class="form-row-2">
+            <div>
+              <label class="control-label">Fecha de Inicio *</label>
+              <input id="staffStartInp" type="date" value="2026-11-01" class="field-input" />
+            </div>
+            <div>
+              <label class="control-label">Semilla Inicial (2 primeros días) *</label>
+              <select id="staffSeedInp" class="field-select">
+                <option value="DD">DD (Día, Día)</option>
+                <option value="DN">DN (Día, Noche)</option>
+                <option value="NN">NN (Noche, Noche)</option>
+                <option value="NR">NR (Noche, Descanso)</option>
+                <option value="RR">RR (Descanso, Descanso)</option>
+                <option value="RD" selected>RD (Descanso, Día)</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;">
+            <button type="submit" class="btn btn-sky">Guardar Funcionario</button>
+          </div>
+        </form>
+
+        <div class="table-scroll" style="border:1px solid var(--border-light);border-radius:12px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Rol</th>
+                <th>Inicio Ciclo</th>
+                <th>Semilla</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="staffModalTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: PERMISOS, VACACIONES Y SUPLENTE MANUAL -->
+  <div id="modalNovelty" class="modal-backdrop hidden">
+    <div class="modal-box sm">
+      <div class="modal-head">
+        <div>
+          <h3 style="font-size:16px;font-weight:800;">Permiso, Novedad o Turno Suplente</h3>
+          <p style="font-size:12px;color:#38bdf8;">Asigna ausencia a un titular con su suplente o turno manual al suplente</p>
+        </div>
+        <button id="btnCloseNovelty" type="button" class="modal-close">✕</button>
+      </div>
+      <form id="formNovelty" class="modal-body">
+        <div>
+          <label class="control-label">Funcionario *</label>
+          <select id="novStaffSel" class="field-select" required></select>
+        </div>
+
+        <div class="form-row-2">
+          <div>
+            <label class="control-label">Desde Fecha *</label>
+            <input id="novDateStart" type="date" class="field-input" required />
+          </div>
+          <div>
+            <label class="control-label">Hasta Fecha *</label>
+            <input id="novDateEnd" type="date" class="field-input" required />
+          </div>
+        </div>
+
+        <div style="background:var(--bg-page);border:1px solid var(--border-light);border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-size:12px;">
+          <div>
+            <span style="color:var(--text-muted);display:block;">Día (Nompropio):</span>
+            <strong id="novDayPreview" style="font-size:13px;">Domingo</strong>
+          </div>
+          <div style="text-align:right;">
+            <span style="color:var(--text-muted);display:block;">Turno Programado:</span>
+            <span id="novBasePreview" class="shift-pill pill-d">D</span>
+          </div>
+        </div>
+
+        <!-- Controles Titular -->
+        <div id="novTitularBox" style="display:flex;flex-direction:column;gap:12px;">
+          <div>
+            <label class="control-label">Motivo / Novedad del Titular</label>
+            <select id="novTypeSel" class="field-select">
+              <option value="PERMISO">Permiso</option>
+              <option value="VACACIONES">Vacaciones</option>
+              <option value="INCAPACIDAD">Incapacidad Médica</option>
+              <option value="LICENCIA">Licencia</option>
+              <option value="CAMBIO_TURNO">Cambio Puntual de Turno</option>
+              <option value="NORMAL">Asiste Normal (Eliminar Novedad)</option>
+            </select>
+          </div>
+
+          <div id="novSubstituteWrapper" style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px;">
+            <label class="control-label" style="color:#92400e;">¿Qué Suplente lo Reemplaza?</label>
+            <select id="novSubSel" class="field-select"></select>
+            <p style="font-size:11px;color:#92400e;margin-top:6px;">
+              El titular conserva su secuencia automática DD-NN-RR y el suplente asume el turno en estas fechas.
+            </p>
+          </div>
+
+          <div id="novManualTitularShiftWrapper" class="hidden" style="background:var(--sky-50);border:1px solid #bae6fd;border-radius:12px;padding:12px;">
+            <label class="control-label" style="color:#0369a1;">Turno Puntual Asignado</label>
+            <select id="novTitularShiftSel" class="field-select">
+              <option value="D">D — Día</option>
+              <option value="N">N — Noche</option>
+              <option value="R">R — Descanso</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Controles Suplente Manual -->
+        <div id="novSuplenteBox" class="hidden" style="background:var(--purple-100);border:1px solid #d8b4fe;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;">
+          <strong style="font-size:12px;color:#581c87;">Asignación 100% Manual de Suplente</strong>
+          <div class="form-row-2">
+            <div>
+              <label class="control-label" style="color:#581c87;">Turno Manual</label>
+              <select id="novSupShiftSel" class="field-select">
+                <option value="D">D — Día</option>
+                <option value="N">N — Noche</option>
+                <option value="R">R — Descanso</option>
+                <option value="LIBRE">Libre (Quitar turno)</option>
+              </select>
+            </div>
+            <div>
+              <label class="control-label" style="color:#581c87;">Cubre a Titular (Opcional)</label>
+              <select id="novSupCoverSel" class="field-select"></select>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="control-label">Observación</label>
+          <input id="novNoteInp" type="text" placeholder="Detalle opcional para nómina..." class="field-input" />
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border-light);">
+          <button id="btnDeleteNovelty" type="button" class="btn btn-rose-soft hidden">Eliminar Registro</button>
+          <div style="display:flex;gap:8px;margin-left:auto;">
+            <button id="btnCancelNovelty" type="button" class="btn btn-ghost">Cancelar</button>
+            <button type="submit" class="btn btn-sky">Guardar y Aplicar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: REPORTE NÓMINA (CSV) -->
+  <div id="modalPayroll" class="modal-backdrop hidden">
+    <div class="modal-box lg">
+      <div class="modal-head">
+        <div>
+          <h3 style="font-size:16px;font-weight:800;">📊 Reporte Nómina (CSV Compatible con Excel)</h3>
+          <p style="font-size:12px;color:#cbd5e1;">Exporta las novedades acumuladas a hoy, del mes anterior o de cualquier periodo con separador punto y coma (;).</p>
+        </div>
+        <button id="btnClosePayroll" type="button" class="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-card">
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+            <span style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;">Cortes Rápidos:</span>
+            <button type="button" data-preset="CURRENT_TODAY" class="btn btn-sky preset-btn">Mes Actual a Hoy</button>
+            <button type="button" data-preset="PREV_MONTH" class="btn btn-ghost preset-btn">Mes Anterior Completo</button>
+            <button type="button" data-preset="SELECTED_MONTH" class="btn btn-ghost preset-btn">Mes Seleccionado Completo</button>
+            <button type="button" data-preset="CUTOFF_26_25" class="btn btn-ghost preset-btn">Corte 26 Ant. al 25 Act.</button>
+          </div>
+
+          <div class="form-row-3">
+            <div>
+              <label class="control-label">Fecha Desde *</label>
+              <input id="payStartInp" type="date" class="field-input" />
+            </div>
+            <div>
+              <label class="control-label">Fecha Hasta *</label>
+              <input id="payEndInp" type="date" class="field-input" />
+            </div>
+            <div>
+              <label class="control-label">Funcionario</label>
+              <select id="payStaffSel" class="field-select"></select>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-wrap:wrap;gap:10px;padding-top:4px;">
+            <button id="btnDownloadNoveltiesCSV" type="button" class="btn btn-amber">
+              ↓ Descargar CSV Novedades y Suplencias
+            </button>
+            <button id="btnDownloadSummaryCSV" type="button" class="btn btn-emerald">
+              ↓ Descargar CSV Consolidado por Funcionario
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="font-size:12px;font-weight:800;text-transform:uppercase;color:var(--text-sec);margin-bottom:8px;">
+            Vista Previa Consolidado (<span id="payPeriodText"></span>)
+          </h4>
+          <div class="table-scroll" style="border:1px solid var(--border-light);border-radius:12px;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Funcionario</th>
+                  <th>Rol</th>
+                  <th>Días (D)</th>
+                  <th>Noches (N)</th>
+                  <th>Desc. (R)</th>
+                  <th>Laborados (D+N)</th>
+                  <th>Permisos/Lic.</th>
+                  <th>Vacaciones</th>
+                  <th>Incapacidad</th>
+                  <th>Suplencias</th>
+                </tr>
+              </thead>
+              <tbody id="paySummaryBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="font-size:12px;font-weight:800;text-transform:uppercase;color:var(--text-sec);margin-bottom:8px;">
+            Vista Previa Novedades y Suplencias (<span id="payNovCount">0</span> registros)
+          </h4>
+          <div class="table-scroll" style="border:1px solid var(--border-light);border-radius:12px;max-height:220px;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Día</th>
+                  <th>Funcionario</th>
+                  <th>Turno Base</th>
+                  <th>Novedad</th>
+                  <th>Suplente / Turno</th>
+                  <th>Observación</th>
+                </tr>
+              </thead>
+              <tbody id="payNoveltiesBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notificación -->
+  <div id="toast" class="toast hide">Actualizado correctamente</div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var STORAGE_KEY = "turnos_ddnnrr_stable_v7";
+      var DEFAULT_CUTOFF = "2026-11-25";
+
+      var MESES_NOMPROPIO = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+      ];
+
+      var DIAS_NOMPROPIO = [
+        "Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"
+      ];
+
+      var DIAS_CORTO = [
+        "Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"
+      ];
+
+      var SEMILLAS_VALIDAS = ["DD", "DN", "NN", "NR", "RR", "RD"];
+
+      function getDefaultState() {
+        return {
+          year: 2026,
+          month: 10, // Noviembre
+          cutoffDate: DEFAULT_CUTOFF,
+          staffFilter: "ALL",
+          activeTab: "sheet",
+          staff: [
+            { id: "st_danilo", name: "Danilo", role: "titular", startDate: "2026-11-01", seed: "RD" },
+            { id: "st_vicente", name: "Vicente", role: "suplente", startDate: "2026-11-01", seed: "NONE" },
+            { id: "st_stefany", name: "STEFANY", role: "titular", startDate: "2026-11-01", seed: "NR" },
+            { id: "st_andres", name: "ANDRES", role: "titular", startDate: "2026-11-01", seed: "DN" }
+          ],
+          novelties: []
+        };
+      }
+
+      var appState = getDefaultState();
+      var memoryStore = null;
+
+      function sanitizeState(raw) {
+        var def = getDefaultState();
+        if (!raw || typeof raw !== "object") return def;
+
+        var y = parseInt(raw.year, 10);
+        var m = parseInt(raw.month, 10);
+        var validYear = (!isNaN(y) && y >= 1900 && y <= 2200) ? y : 2026;
+        var validMonth = (!isNaN(m) && m >= 0 && m <= 11) ? m : 10;
+        var validCutoff = /^\d{4}-\d{2}-\d{2}$/.test(String(raw.cutoffDate || "")) ? raw.cutoffDate : DEFAULT_CUTOFF;
+
+        var staffList = [];
+        if (Array.isArray(raw.staff) && raw.staff.length > 0) {
+          for (var i = 0; i < raw.staff.length; i++) {
+            var item = raw.staff[i];
+            if (item && typeof item.name === "string" && item.name.trim() !== "") {
+              var roleNorm = String(item.role || "").toLowerCase() === "suplente" ? "suplente" : "titular";
+              var seedNorm = SEMILLAS_VALIDAS.indexOf(String(item.seed || "").toUpperCase()) !== -1
+                ? String(item.seed).toUpperCase()
+                : (roleNorm === "suplente" ? "NONE" : "RD");
+              staffList.push({
+                id: String(item.id || ("st_" + i + "_" + Date.now())),
+                name: item.name.trim(),
+                role: roleNorm,
+                startDate: /^\d{4}-\d{2}-\d{2}$/.test(String(item.startDate || "")) ? item.startDate : "2026-11-01",
+                seed: roleNorm === "suplente" ? "NONE" : seedNorm
+              });
+            }
+          }
+        }
+        if (staffList.length === 0) staffList = def.staff;
+
+        var novList = [];
+        if (Array.isArray(raw.novelties)) {
+          for (var j = 0; j < raw.novelties.length; j++) {
+            var nv = raw.novelties[j];
+            if (nv && nv.staffId && /^\d{4}-\d{2}-\d{2}$/.test(String(nv.date || ""))) {
+              novList.push(nv);
+            }
+          }
+        }
+
+        return {
+          year: validYear,
+          month: validMonth,
+          cutoffDate: validCutoff,
+          staffFilter: raw.staffFilter || "ALL",
+          activeTab: ["sheet", "annual", "log"].indexOf(raw.activeTab) !== -1 ? raw.activeTab : "sheet",
+          staff: staffList,
+          novelties: novList
+        };
+      }
+
+      function loadState() {
+        try {
+          var raw = window.localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            return sanitizeState(JSON.parse(raw));
+          }
+        } catch (e) {
+          if (memoryStore) return sanitizeState(memoryStore);
+        }
+        return getDefaultState();
+      }
+
+      function saveState() {
+        memoryStore = JSON.parse(JSON.stringify(appState));
+        try {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        } catch (e) {
+          // Respaldo silencioso en memoria para Safari modo privado
+        }
+      }
+
+      /**
+       * Regla Excel exacta hacia adelante:
+       * =+SI(B4&C4="DD";"N";SI(B4&C4="DN";"N";SI(B4&C4="NN";"R";SI(B4&C4="NR";"R";SI(B4&C4="RR";"D";SI(B4&C4="RD";"D";""))))))
+       */
+      function nextShiftForward(prev2, prev1) {
+        var pair = prev2 + prev1;
+        if (pair === "DD") return "N";
+        if (pair === "DN") return "N";
+        if (pair === "NN") return "R";
+        if (pair === "NR") return "R";
+        if (pair === "RR") return "D";
+        if (pair === "RD") return "D";
+        return "D";
+      }
+
+      /**
+       * Regla inversa determinista hacia atrás:
+       * Si día t es cur0 y día t+1 es cur1, deduce día t-1:
+       * RD->D => anterior fue R (RR->D)
+       * DD->N => anterior fue R (RD->D)
+       * DN->N => anterior fue D (DD->N)
+       * NN->R => anterior fue D (DN->N)
+       * NR->R => anterior fue N (NN->R)
+       * RR->D => anterior fue N (NR->R)
+       */
+      function prevShiftBackward(cur0, cur1) {
+        var pair = cur0 + cur1;
+        if (pair === "RD") return "R";
+        if (pair === "DD") return "R";
+        if (pair === "DN") return "D";
+        if (pair === "NN") return "D";
+        if (pair === "NR") return "N";
+        if (pair === "RR") return "N";
+        return "R";
+      }
+
+      function parseISO(isoStr) {
+        var parts = String(isoStr || "2026-11-01").split("-");
+        return {
+          y: parseInt(parts[0], 10) || 2026,
+          m: (parseInt(parts[1], 10) || 11) - 1,
+          d: parseInt(parts[2], 10) || 1
+        };
+      }
+
+      function formatISO(y, m, d) {
+        var mm = m + 1 < 10 ? "0" + (m + 1) : String(m + 1);
+        var dd = d < 10 ? "0" + d : String(d);
+        return y + "-" + mm + "-" + dd;
+      }
+
+      function diffDaysUTC(y1, m1, d1, y2, m2, d2) {
+        var u1 = Date.UTC(y1, m1, d1);
+        var u2 = Date.UTC(y2, m2, d2);
+        return Math.round((u1 - u2) / 86400000);
+      }
+
+      function addDaysISO(isoStr, delta) {
+        var p = parseISO(isoStr);
+        var dt = new Date(Date.UTC(p.y, p.m, p.d + delta));
+        return formatISO(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate());
+      }
+
+      function isLeapYear(y) {
+        return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+      }
+
+      function getNompropioDay(y, m, d) {
+        var dt = new Date(y, m, d);
+        return DIAS_NOMPROPIO[dt.getDay()];
+      }
+
+      /**
+       * Calcula el turno programado DD-NN-RR para cualquier fecha (futura o pasada)
+       */
+      function getTitularBaseShift(person, y, m, d) {
+        if (!person || person.role === "suplente") return "";
+        var st = parseISO(person.startDate);
+        var diff = diffDaysUTC(y, m, d, st.y, st.m, st.d);
+        var seed = SEMILLAS_VALIDAS.indexOf(person.seed) !== -1 ? person.seed : "RD";
+        var s0 = seed.charAt(0);
+        var s1 = seed.charAt(1);
+
+        if (diff === 0) return s0;
+        if (diff === 1) return s1;
+
+        if (diff > 1) {
+          var p2 = s0;
+          var p1 = s1;
+          var cur = s1;
+          for (var i = 2; i <= diff; i++) {
+            cur = nextShiftForward(p2, p1);
+            p2 = p1;
+            p1 = cur;
+          }
+          return cur;
+        } else {
+          var c0 = s0;
+          var c1 = s1;
+          var prev = s0;
+          for (var step = -1; step >= diff; step--) {
+            prev = prevShiftBackward(c0, c1);
+            c1 = c0;
+            c0 = prev;
+          }
+          return prev;
+        }
+      }
+
+      /**
+       * Evalúa el estado completo de un funcionario en una fecha específica
+       */
+      function getDayCellInfo(person, dateISO) {
+        var p = parseISO(dateISO);
+        var baseShift = getTitularBaseShift(person, p.y, p.m, p.d);
+        var staffMap = {};
+        for (var i = 0; i < appState.staff.length; i++) {
+          staffMap[appState.staff[i].id] = appState.staff[i];
+        }
+
+        var ownNov = null;
+        var coveringNov = null;
+        for (var j = 0; j < appState.novelties.length; j++) {
+          var n = appState.novelties[j];
+          if (n.date === dateISO) {
+            if (n.staffId === person.id) ownNov = n;
+            if (n.kind === "ABSENCE" && n.substituteId === person.id) coveringNov = n;
+          }
+        }
+
+        if (person.role === "suplente") {
+          if (ownNov && ownNov.kind === "MANUAL_SHIFT" && ownNov.manualShift && ownNov.manualShift !== "LIBRE") {
+            var covTit = ownNov.substituteId ? staffMap[ownNov.substituteId] : null;
+            return {
+              baseShift: "",
+              effectiveShift: ownNov.manualShift,
+              badge: ownNov.manualShift,
+              subText: covTit ? "Cub. " + covTit.name : "Manual",
+              pillClass: "pill-sup",
+              isAbsence: false,
+              isCovering: true,
+              nov: ownNov
+            };
+          }
+          if (coveringNov) {
+            var absTit = staffMap[coveringNov.staffId];
+            var shiftToCover = absTit ? getTitularBaseShift(absTit, p.y, p.m, p.d) : "D";
+            return {
+              baseShift: "",
+              effectiveShift: shiftToCover || "D",
+              badge: shiftToCover || "D",
+              subText: absTit ? "Cub. " + absTit.name : "Supl.",
+              pillClass: "pill-sup",
+              isAbsence: false,
+              isCovering: true,
+              nov: coveringNov
+            };
+          }
+          return {
+            baseShift: "",
+            effectiveShift: "",
+            badge: "—",
+            subText: "Libre",
+            pillClass: "pill-free",
+            isAbsence: false,
+            isCovering: false,
+            nov: null
+          };
+        }
+
+        // Funcionario Titular
+        if (ownNov) {
+          if (ownNov.kind === "SHIFT_OVERRIDE" && ownNov.manualShift) {
+            return {
+              baseShift: baseShift,
+              effectiveShift: ownNov.manualShift,
+              badge: ownNov.manualShift,
+              subText: "Cambio",
+              pillClass: ownNov.manualShift === "D" ? "pill-d" : (ownNov.manualShift === "N" ? "pill-n" : "pill-r"),
+              isAbsence: false,
+              isCovering: false,
+              nov: ownNov
+            };
+          }
+          if (ownNov.kind === "ABSENCE") {
+            var sup = ownNov.substituteId ? staffMap[ownNov.substituteId] : null;
+            return {
+              baseShift: baseShift,
+              effectiveShift: "",
+              badge: baseShift || "AUS",
+              subText: sup ? "Sup: " + sup.name : ownNov.type,
+              pillClass: sup ? "pill-abs-cov" : "pill-abs-uncov",
+              isAbsence: true,
+              isCovering: false,
+              nov: ownNov
+            };
+          }
+        }
+
+        var pClass = baseShift === "D" ? "pill-d" : (baseShift === "N" ? "pill-n" : "pill-r");
+        return {
+          baseShift: baseShift,
+          effectiveShift: baseShift,
+          badge: baseShift,
+          subText: "",
+          pillClass: pClass,
+          isAbsence: false,
+          isCovering: false,
+          nov: null
+        };
+      }
+
+      /**
+       * Calcula métricas acumuladas en un rango [startISO, endISO]
+       */
+      function calculatePeriodMetrics(person, startISO, endISO) {
+        var sp = parseISO(startISO);
+        var ep = parseISO(endISO);
+        var diff = diffDaysUTC(ep.y, ep.m, ep.d, sp.y, sp.m, sp.d);
+        var res = {
+          cD: 0,
+          cN: 0,
+          cR: 0,
+          worked: 0,
+          permisos: 0,
+          vacaciones: 0,
+          incapacidades: 0,
+          totalNov: 0,
+          suplencias: 0
+        };
+        if (diff < 0) return res;
+
+        for (var i = 0; i <= diff; i++) {
+          var dISO = addDaysISO(startISO, i);
+          var info = getDayCellInfo(person, dISO);
+          if (person.role === "suplente") {
+            if (info.effectiveShift === "D") res.cD++;
+            if (info.effectiveShift === "N") res.cN++;
+            if (info.effectiveShift === "R") res.cR++;
+            if (info.isCovering) res.suplencias++;
+          } else {
+            if (info.isAbsence) {
+              res.totalNov++;
+              var t = info.nov ? info.nov.type : "PERMISO";
+              if (t === "VACACIONES") res.vacaciones++;
+              else if (t === "INCAPACIDAD") res.incapacidades++;
+              else res.permisos++;
+            } else {
+              if (info.effectiveShift === "D") res.cD++;
+              if (info.effectiveShift === "N") res.cN++;
+              if (info.effectiveShift === "R") res.cR++;
+            }
+          }
+        }
+        res.worked = res.cD + res.cN;
+        return res;
+      }
+
+      function getFilteredStaff() {
+        if (appState.staffFilter === "ALL") return appState.staff;
+        return appState.staff.filter(function (s) { return s.id === appState.staffFilter; });
+      }
+
+      /**
+       * RENDERIZADO VISTA 1: SÁBANA MENSUAL
+       */
+      function renderSheetView() {
+        var y = appState.year;
+        var m = appState.month;
+        var daysInMonth = new Date(y, m + 1, 0).getDate();
+        var cutoff = appState.cutoffDate || DEFAULT_CUTOFF;
+        var staffList = getFilteredStaff();
+
+        document.getElementById("bannerMonthYear").textContent = MESES_NOMPROPIO[m] + " " + y;
+
+        var html = "<thead><tr>";
+        html += '<th class="sticky-col">Funcionario / Ajuste Rápido</th>';
+
+        for (var d = 1; d <= daysInMonth; d++) {
+          var dt = new Date(y, m, d);
+          var dISO = formatISO(y, m, d);
+          var isWeekend = dt.getDay() === 0 || dt.getDay() === 6;
+          var isToday = dISO === cutoff;
+          var isFuture = dISO > cutoff;
+
+          var cls = "day-th";
+          if (isWeekend) cls += " weekend";
+          if (isToday) cls += " is-today";
+          else if (isFuture) cls += " is-future";
+
+          var ddStr = d < 10 ? "0" + d : String(d);
+          var topTxt = isToday ? "★ HOY" : DIAS_CORTO[dt.getDay()];
+          html += '<th class="' + cls + '" title="' + getNompropioDay(y, m, d) + " " + ddStr + "/" + (m + 1) + "/" + y + '">';
+          html += '<div class="day-th-name">' + topTxt + "</div>";
+          html += '<div class="day-th-num">' + ddStr + "</div>";
+          html += "</th>";
+        }
+        html += "</tr></thead><tbody>";
+
+        for (var i = 0; i < staffList.length; i++) {
+          var p = staffList[i];
+          var isSup = p.role === "suplente";
+          html += "<tr>";
+          html += '<td class="sticky-col">';
+          html += '<div class="staff-name-row">';
+          html += '<span class="staff-name-txt">' + escapeHtml(p.name) + "</span>";
+          html += '<span class="role-badge ' + (isSup ? "role-suplente" : "role-titular") + '">' + (isSup ? "Suplente" : "Titular") + "</span>";
+          html += "</div>";
+
+          if (!isSup) {
+            html += '<div class="inline-controls">';
+            html += '<input type="date" class="mini-date" data-inline-date="' + p.id + '" value="' + p.startDate + '" title="Fecha inicio secuencia" />';
+            html += '<select class="mini-seed" data-inline-seed="' + p.id + '" title="Semilla inicial">';
+            for (var sIdx = 0; sIdx < SEMILLAS_VALIDAS.length; sIdx++) {
+              var sd = SEMILLAS_VALIDAS[sIdx];
+              html += '<option value="' + sd + '"' + (p.seed === sd ? " selected" : "") + ">" + sd + "</option>";
+            }
+            html += "</select></div>";
+          } else {
+            html += '<div style="font-size:11px;color:#6b21a8;margin-top:4px;font-weight:600;">Asignación 100% manual</div>';
+          }
+          html += "</td>";
+
+          for (var day = 1; day <= daysInMonth; day++) {
+            var cellISO = formatISO(y, m, day);
+            var cellInfo = getDayCellInfo(p, cellISO);
+            var cellCls = "day-cell";
+            if (cellISO === cutoff) cellCls += " is-today";
+            else if (cellISO > cutoff) cellCls += " is-future";
+
+            html += '<td class="' + cellCls + '" data-cell-staff="' + p.id + '" data-cell-date="' + cellISO + '">';
+            html += '<span class="shift-pill ' + cellInfo.pillClass + '">' + cellInfo.badge + "</span>";
+            if (cellInfo.subText) {
+              html += '<div class="cell-sub">' + escapeHtml(cellInfo.subText) + "</div>";
+            }
+            html += "</td>";
+          }
+          html += "</tr>";
+        }
+        html += "</tbody>";
+
+        document.getElementById("sheetTable").innerHTML = html;
+        renderSummaryCards(staffList, y, m, daysInMonth, cutoff);
+      }
+
+      function renderSummaryCards(staffList, y, m, daysInMonth, cutoffISO) {
+        var monthStart = formatISO(y, m, 1);
+        var monthEnd = formatISO(y, m, daysInMonth);
+
+        var periodMode = "CUTOFF"; // CUTOFF | CLOSED | FUTURE
+        var effectiveEnd = monthEnd;
+        var badgeText = "";
+        var badgeCls = "tag-cutoff";
+
+        if (monthEnd < cutoffISO) {
+          periodMode = "CLOSED";
+          effectiveEnd = monthEnd;
+          badgeText = "Cierre mes completo (01 al " + daysInMonth + " " + MESES_NOMPROPIO[m].slice(0, 3) + ")";
+          badgeCls = "tag-closed";
+        } else if (monthStart > cutoffISO) {
+          periodMode = "FUTURE";
+          effectiveEnd = monthEnd;
+          badgeText = "Proyección mes completo (01 al " + daysInMonth + " " + MESES_NOMPROPIO[m].slice(0, 3) + ")";
+          badgeCls = "tag-future";
+        } else {
+          periodMode = "CUTOFF";
+          effectiveEnd = cutoffISO;
+          var cp = parseISO(cutoffISO);
+          var dCutStr = cp.d < 10 ? "0" + cp.d : String(cp.d);
+          badgeText = "A fecha de corte (01 al " + dCutStr + " " + MESES_NOMPROPIO[m].slice(0, 3) + ")";
+          badgeCls = "tag-cutoff";
+        }
+
+        var cardsHtml = "";
+        for (var i = 0; i < staffList.length; i++) {
+          var p = staffList[i];
+          var isSup = p.role === "suplente";
+          var mainStats = calculatePeriodMetrics(p, monthStart, effectiveEnd);
+          var fullStats = calculatePeriodMetrics(p, monthStart, monthEnd);
+
+          var fourthLabel = isSup ? "Coberturas" : "Permisos";
+          var fourthMain = isSup ? mainStats.suplencias : mainStats.totalNov;
+
+          cardsHtml += '<article class="summary-card">';
+          cardsHtml += '<div class="card-top">';
+          cardsHtml += '<div>';
+          cardsHtml += '<div class="card-title-row">';
+          cardsHtml += '<span class="card-name">' + escapeHtml(p.name) + "</span>";
+          cardsHtml += '<span class="role-badge ' + (isSup ? "role-suplente" : "role-titular") + '">' + (isSup ? "Suplente" : "Titular") + "</span>";
+          cardsHtml += "</div>";
+          cardsHtml += '<div class="card-meta">' + (isSup ? "Asignación manual de reemplazos" : "Inicio: " + p.startDate + " • Semilla: " + p.seed) + "</div>";
+          cardsHtml += '<span class="card-period-tag ' + badgeCls + '">' + badgeText + "</span>";
+          cardsHtml += "</div>";
+          cardsHtml += '<button type="button" class="btn btn-ghost" style="padding:6px 10px;font-size:12px;" data-open-nov-staff="' + p.id + '">';
+          cardsHtml += (isSup ? "+ Asignar Turno" : "+ Permiso / Ciclo") + "</button>";
+          cardsHtml += "</div>";
+
+          cardsHtml += '<div class="metrics-4">';
+          cardsHtml += '<div class="metric-box m-d"><div class="metric-lbl">Días (D)</div><div class="metric-val">' + mainStats.cD + "</div></div>";
+          cardsHtml += '<div class="metric-box m-n"><div class="metric-lbl">Noches (N)</div><div class="metric-val">' + mainStats.cN + "</div></div>";
+          cardsHtml += '<div class="metric-box m-r"><div class="metric-lbl">Desc. (R)</div><div class="metric-val">' + mainStats.cR + "</div></div>";
+          cardsHtml += '<div class="metric-box m-p"><div class="metric-lbl">' + fourthLabel + '</div><div class="metric-val">' + fourthMain + "</div></div>";
+          cardsHtml += "</div>";
+
+          if (periodMode === "CUTOFF") {
+            cardsHtml += '<div class="card-footer-line">';
+            cardsHtml += "<span>Proyección mes completo:</span>";
+            cardsHtml += "<strong>" + fullStats.cD + " D • " + fullStats.cN + " N • " + fullStats.cR + " R</strong>";
+            cardsHtml += "</div>";
+          } else {
+            cardsHtml += '<div class="card-footer-line">';
+            cardsHtml += "<span>Total turnos laborados (D + N):</span>";
+            cardsHtml += "<strong>" + mainStats.worked + " turnos</strong>";
+            cardsHtml += "</div>";
+          }
+
+          cardsHtml += "</article>";
+        }
+
+        document.getElementById("summaryCardsGrid").innerHTML = cardsHtml;
+      }
+
+      /**
+       * RENDERIZADO VISTA 2: 12 MESES
+       */
+      function renderAnnualView() {
+        var y = appState.year;
+        var staffList = getFilteredStaff();
+        var html = "";
+
+        for (var m = 0; m < 12; m++) {
+          var daysInMonth = new Date(y, m + 1, 0).getDate();
+          html += '<article class="month-card">';
+          html += '<div class="month-card-head">';
+          html += '<strong style="font-size:14px;">' + MESES_NOMPROPIO[m] + " " + y + "</strong>";
+          html += '<button type="button" class="btn-mini" data-jump-month="' + m + '">Ver sábana →</button>';
+          html += "</div><div class='month-card-body'>";
+
+          for (var d = 1; d <= daysInMonth; d++) {
+            var dt = new Date(y, m, d);
+            var dISO = formatISO(y, m, d);
+            var isWk = dt.getDay() === 0 || dt.getDay() === 6;
+            var ddStr = d < 10 ? "0" + d : String(d);
+
+            html += '<div class="annual-day-row' + (isWk ? " weekend" : "") + '">';
+            html += '<div><strong>' + ddStr + '</strong> <span style="color:' + (isWk ? "#e11d48" : "#475569") + ';">' + getNompropioDay(y, m, d) + "</span></div>";
+            html += '<div class="annual-pills">';
+
+            for (var i = 0; i < staffList.length; i++) {
+              var p = staffList[i];
+              var info = getDayCellInfo(p, dISO);
+              if (p.role === "suplente" && !info.isCovering) continue;
+              html += '<button type="button" class="mini-chip ' + info.pillClass + '" data-cell-staff="' + p.id + '" data-cell-date="' + dISO + '">';
+              html += escapeHtml(p.name) + ": " + info.badge;
+              html += "</button>";
+            }
+            html += "</div></div>";
+          }
+          html += "</div></article>";
+        }
+
+        document.getElementById("annualMonthsContainer").innerHTML = html;
+      }
+
+      /**
+       * RENDERIZADO VISTA 3: BITÁCORA DE NOVEDADES
+       */
+      function renderLogView() {
+        var tbody = document.getElementById("logTableBody");
+        var staffMap = {};
+        for (var i = 0; i < appState.staff.length; i++) {
+          staffMap[appState.staff[i].id] = appState.staff[i];
+        }
+
+        var sorted = appState.novelties.slice().sort(function (a, b) {
+          return a.date.localeCompare(b.date);
+        });
+
+        if (sorted.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:#64748b;">No hay novedades registradas todavía.</td></tr>';
+          return;
+        }
+
+        var rows = "";
+        for (var j = 0; j < sorted.length; j++) {
+          var nv = sorted[j];
+          var person = staffMap[nv.staffId];
+          var pDate = parseISO(nv.date);
+          var baseShift = person && person.role === "titular" ? getTitularBaseShift(person, pDate.y, pDate.m, pDate.d) : "—";
+          var sup = nv.substituteId ? staffMap[nv.substituteId] : null;
+
+          var detailTxt = "—";
+          if (nv.kind === "ABSENCE") {
+            detailTxt = sup ? "Suplente: " + sup.name : "Sin suplente";
+          } else if (nv.kind === "MANUAL_SHIFT") {
+            detailTxt = "Turno " + nv.manualShift + (sup ? " (Cubre a " + sup.name + ")" : "");
+          } else if (nv.kind === "SHIFT_OVERRIDE") {
+            detailTxt = "Cambio a " + nv.manualShift;
+          }
+
+          rows += "<tr>";
+          rows += "<td><strong>" + nv.date + "</strong></td>";
+          rows += "<td>" + getNompropioDay(pDate.y, pDate.m, pDate.d) + "</td>";
+          rows += "<td><strong>" + (person ? escapeHtml(person.name) : "Eliminado") + "</strong></td>";
+          rows += "<td>" + (baseShift || "—") + "</td>";
+          rows += "<td><span class='leg-item leg-p'>" + escapeHtml(nv.type) + "</span></td>";
+          rows += "<td><strong>" + escapeHtml(detailTxt) + "</strong></td>";
+          rows += "<td>" + escapeHtml(nv.note || "—") + "</td>";
+          rows += '<td class="no-print"><button type="button" class="btn btn-rose-soft" style="padding:4px 8px;font-size:11px;" data-del-nov="' + nv.id + '">Eliminar</button></td>';
+          rows += "</tr>";
+        }
+        tbody.innerHTML = rows;
+      }
+
+      /**
+       * MODAL DE NOVEDADES Y SUPLENTE
+       */
+      function openNoveltyModal(staffId, dateISO) {
+        var selStaff = document.getElementById("novStaffSel");
+        var opts = "";
+        for (var i = 0; i < appState.staff.length; i++) {
+          var s = appState.staff[i];
+          opts += '<option value="' + s.id + '">' + escapeHtml(s.name) + " (" + (s.role === "titular" ? "Titular" : "Suplente") + ")</option>";
+        }
+        selStaff.innerHTML = opts;
+        selStaff.value = staffId || (appState.staff[0] ? appState.staff[0].id : "");
+
+        var targetDate = dateISO || formatISO(appState.year, appState.month, 1);
+        document.getElementById("novDateStart").value = targetDate;
+        document.getElementById("novDateEnd").value = targetDate;
+
+        syncNoveltyModalFields();
+        document.getElementById("modalNovelty").classList.remove("hidden");
+      }
+
+      function syncNoveltyModalFields() {
+        var staffId = document.getElementById("novStaffSel").value;
+        var dateISO = document.getElementById("novDateStart").value;
+        var person = null;
+        for (var i = 0; i < appState.staff.length; i++) {
+          if (appState.staff[i].id === staffId) person = appState.staff[i];
+        }
+
+        // Poblar selectores de suplentes y titulares
+        var subOpts = '<option value="">-- Sin suplente --</option>';
+        var titOpts = '<option value="">-- Turno manual directo --</option>';
+        for (var j = 0; j < appState.staff.length; j++) {
+          var st = appState.staff[j];
+          if (st.id !== staffId) {
+            subOpts += '<option value="' + st.id + '">' + escapeHtml(st.name) + " (" + st.role + ")</option>";
+            if (st.role === "titular") {
+              titOpts += '<option value="' + st.id + '">' + escapeHtml(st.name) + "</option>";
+            }
+          }
+        }
+        document.getElementById("novSubSel").innerHTML = subOpts;
+        document.getElementById("novSupCoverSel").innerHTML = titOpts;
+
+        // Preseleccionar Vicente si existe
+        for (var k = 0; k < appState.staff.length; k++) {
+          if (appState.staff[k].id !== staffId && appState.staff[k].role === "suplente") {
+            document.getElementById("novSubSel").value = appState.staff[k].id;
+            break;
+          }
+        }
+
+        var existing = null;
+        for (var m = 0; m < appState.novelties.length; m++) {
+          if (appState.novelties[m].staffId === staffId && appState.novelties[m].date === dateISO) {
+            existing = appState.novelties[m];
+            break;
+          }
+        }
+
+        var btnDel = document.getElementById("btnDeleteNovelty");
+        if (existing) {
+          btnDel.classList.remove("hidden");
+          document.getElementById("novNoteInp").value = existing.note || "";
+          if (existing.kind === "MANUAL_SHIFT") {
+            document.getElementById("novSupShiftSel").value = existing.manualShift || "D";
+            document.getElementById("novSupCoverSel").value = existing.substituteId || "";
+          } else if (existing.kind === "SHIFT_OVERRIDE") {
+            document.getElementById("novTypeSel").value = "CAMBIO_TURNO";
+            document.getElementById("novTitularShiftSel").value = existing.manualShift || "D";
+          } else {
+            document.getElementById("novTypeSel").value = existing.type || "PERMISO";
+            document.getElementById("novSubSel").value = existing.substituteId || "";
+          }
+        } else {
+          btnDel.classList.add("hidden");
+          document.getElementById("novNoteInp").value = "";
+          document.getElementById("novTypeSel").value = "PERMISO";
+        }
+
+        updateNoveltyModalVisibility(person, dateISO);
+      }
+
+      function updateNoveltyModalVisibility(person, dateISO) {
+        var isSup = person && person.role === "suplente";
+        document.getElementById("novTitularBox").classList.toggle("hidden", isSup);
+        document.getElementById("novSuplenteBox").classList.toggle("hidden", !isSup);
+
+        if (!isSup) {
+          var tVal = document.getElementById("novTypeSel").value;
+          document.getElementById("novSubstituteWrapper").classList.toggle("hidden", tVal === "NORMAL" || tVal === "CAMBIO_TURNO");
+          document.getElementById("novManualTitularShiftWrapper").classList.toggle("hidden", tVal !== "CAMBIO_TURNO");
+        }
+
+        if (dateISO) {
+          var p = parseISO(dateISO);
+          document.getElementById("novDayPreview").textContent = getNompropioDay(p.y, p.m, p.d) + ", " + dateISO;
+          var baseS = person && !isSup ? getTitularBaseShift(person, p.y, p.m, p.d) : "Manual";
+          var badgeEl = document.getElementById("novBasePreview");
+          badgeEl.textContent = baseS;
+          badgeEl.className = "shift-pill " + (baseS === "D" ? "pill-d" : (baseS === "N" ? "pill-n" : (baseS === "R" ? "pill-r" : "pill-sup")));
+        }
+      }
+
+      /**
+       * MODAL REPORTE NÓMINA (CSV)
+       */
+      function applyPayrollPreset(preset) {
+        var cutoff = appState.cutoffDate || DEFAULT_CUTOFF;
+        var cp = parseISO(cutoff);
+        var sy = appState.year;
+        var sm = appState.month;
+        var sISO = cutoff;
+        var eISO = cutoff;
+
+        if (preset === "CURRENT_TODAY") {
+          sISO = formatISO(cp.y, cp.m, 1);
+          eISO = cutoff;
+        } else if (preset === "PREV_MONTH") {
+          var py = sm === 0 ? sy - 1 : sy;
+          var pm = sm === 0 ? 11 : sm - 1;
+          var pDays = new Date(py, pm + 1, 0).getDate();
+          sISO = formatISO(py, pm, 1);
+          eISO = formatISO(py, pm, pDays);
+        } else if (preset === "SELECTED_MONTH") {
+          var sDays = new Date(sy, sm + 1, 0).getDate();
+          sISO = formatISO(sy, sm, 1);
+          eISO = formatISO(sy, sm, sDays);
+        } else if (preset === "CUTOFF_26_25") {
+          var py2 = sm === 0 ? sy - 1 : sy;
+          var pm2 = sm === 0 ? 11 : sm - 1;
+          sISO = formatISO(py2, pm2, 26);
+          eISO = formatISO(sy, sm, 25);
+        }
+
+        document.getElementById("payStartInp").value = sISO;
+        document.getElementById("payEndInp").value = eISO;
+
+        var btns = document.querySelectorAll(".preset-btn");
+        for (var i = 0; i < btns.length; i++) {
+          var isMatch = btns[i].getAttribute("data-preset") === preset;
+          btns[i].className = "btn preset-btn " + (isMatch ? "btn-sky" : "btn-ghost");
+        }
+
+        renderPayrollPreview();
+      }
+
+      function buildPayrollData() {
+        var sISO = document.getElementById("payStartInp").value || formatISO(appState.year, appState.month, 1);
+        var eISO = document.getElementById("payEndInp").value || sISO;
+        var filterId = document.getElementById("payStaffSel").value || "ALL";
+
+        var sp = parseISO(sISO);
+        var ep = parseISO(eISO);
+        var diff = Math.max(0, Math.min(366, diffDaysUTC(ep.y, ep.m, ep.d, sp.y, sp.m, sp.d)));
+        var endClamped = addDaysISO(sISO, diff);
+
+        var staffMap = {};
+        for (var i = 0; i < appState.staff.length; i++) {
+          staffMap[appState.staff[i].id] = appState.staff[i];
+        }
+
+        var targetStaff = filterId === "ALL"
+          ? appState.staff
+          : appState.staff.filter(function (s) { return s.id === filterId; });
+
+        var summaries = [];
+        for (var j = 0; j < targetStaff.length; j++) {
+          summaries.push({
+            person: targetStaff[j],
+            metrics: calculatePeriodMetrics(targetStaff[j], sISO, endClamped)
+          });
+        }
+
+        var novelties = [];
+        for (var dOff = 0; dOff <= diff; dOff++) {
+          var curISO = addDaysISO(sISO, dOff);
+          var cp = parseISO(curISO);
+          var dName = getNompropioDay(cp.y, cp.m, cp.d);
+
+          for (var nIdx = 0; nIdx < appState.novelties.length; nIdx++) {
+            var nv = appState.novelties[nIdx];
+            if (nv.date !== curISO) continue;
+            if (filterId !== "ALL" && nv.staffId !== filterId && nv.substituteId !== filterId) continue;
+
+            var pObj = staffMap[nv.staffId];
+            if (!pObj) continue;
+
+            if (nv.kind === "ABSENCE") {
+              var origShift = getTitularBaseShift(pObj, cp.y, cp.m, cp.d) || "—";
+              var supObj = nv.substituteId ? staffMap[nv.substituteId] : null;
+              novelties.push({
+                date: curISO,
+                dayName: dName,
+                funcionario: pObj.name,
+                baseShift: origShift,
+                tipo: nv.type,
+                suplente: supObj ? supObj.name + " (" + origShift + ")" : "Sin suplente",
+                obs: nv.note || ""
+              });
+            } else if (nv.kind === "MANUAL_SHIFT" && nv.manualShift !== "LIBRE") {
+              var covTit = nv.substituteId ? staffMap[nv.substituteId] : null;
+              novelties.push({
+                date: curISO,
+                dayName: dName,
+                funcionario: covTit ? covTit.name : pObj.name,
+                baseShift: nv.manualShift,
+                tipo: "Turno Manual Suplente",
+                suplente: pObj.name + " (" + nv.manualShift + ")",
+                obs: nv.note || ""
+              });
+            } else if (nv.kind === "SHIFT_OVERRIDE") {
+              novelties.push({
+                date: curISO,
+                dayName: dName,
+                funcionario: pObj.name,
+                baseShift: getTitularBaseShift(pObj, cp.y, cp.m, cp.d) || "—",
+                tipo: "Cambio Turno a " + nv.manualShift,
+                suplente: "—",
+                obs: nv.note || ""
+              });
+            }
+          }
+        }
+
+        return {
+          startISO: sISO,
+          endISO: endClamped,
+          daysCount: diff + 1,
+          summaries: summaries,
+          novelties: novelties
+        };
+      }
+
+      function renderPayrollPreview() {
+        var data = buildPayrollData();
+        document.getElementById("payPeriodText").textContent = data.startISO + " al " + data.endISO + " (" + data.daysCount + " días)";
+        document.getElementById("payNovCount").textContent = String(data.novelties.length);
+
+        var sHtml = "";
+        for (var i = 0; i < data.summaries.length; i++) {
+          var row = data.summaries[i];
+          var m = row.metrics;
+          sHtml += "<tr>";
+          sHtml += "<td><strong>" + escapeHtml(row.person.name) + "</strong></td>";
+          sHtml += "<td>" + (row.person.role === "titular" ? "Titular" : "Suplente") + "</td>";
+          sHtml += "<td>" + m.cD + "</td>";
+          sHtml += "<td>" + m.cN + "</td>";
+          sHtml += "<td>" + m.cR + "</td>";
+          sHtml += "<td><strong>" + m.worked + "</strong></td>";
+          sHtml += "<td>" + m.permisos + "</td>";
+          sHtml += "<td>" + m.vacaciones + "</td>";
+          sHtml += "<td>" + m.incapacidades + "</td>";
+          sHtml += "<td>" + m.suplencias + "</td>";
+          sHtml += "</tr>";
+        }
+        document.getElementById("paySummaryBody").innerHTML = sHtml;
+
+        var nHtml = "";
+        if (data.novelties.length === 0) {
+          nHtml = '<tr><td colspan="7" style="text-align:center;padding:16px;color:#64748b;">Sin novedades registradas en este rango.</td></tr>';
+        } else {
+          for (var j = 0; j < data.novelties.length; j++) {
+            var n = data.novelties[j];
+            nHtml += "<tr>";
+            nHtml += "<td><strong>" + n.date + "</strong></td>";
+            nHtml += "<td>" + n.dayName + "</td>";
+            nHtml += "<td><strong>" + escapeHtml(n.funcionario) + "</strong></td>";
+            nHtml += "<td>" + n.baseShift + "</td>";
+            nHtml += "<td>" + escapeHtml(n.tipo) + "</td>";
+            nHtml += "<td>" + escapeHtml(n.suplente) + "</td>";
+            nHtml += "<td>" + escapeHtml(n.obs || "—") + "</td>";
+            nHtml += "</tr>";
+          }
+        }
+        document.getElementById("payNoveltiesBody").innerHTML = nHtml;
+      }
+
+      function triggerCSVDownload(csvStr, filename) {
+        var blob = new Blob(["\uFEFF" + csvStr], { type: "text/csv;charset=utf-8;" });
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+
+      /**
+       * ACTUALIZACIÓN GENERAL DE INTERFAZ
+       */
+      function refreshUI() {
+        document.getElementById("headerYearText").textContent = String(appState.year);
+        document.getElementById("inputYear").value = String(appState.year);
+        document.getElementById("selectMonth").value = String(appState.month);
+        document.getElementById("inputCutoffDate").value = appState.cutoffDate;
+        document.getElementById("cutoffLegendText").textContent = "Mostrando acumulado real al " + appState.cutoffDate;
+
+        var totalDaysYear = isLeapYear(appState.year) ? 366 : 365;
+        document.getElementById("leapYearText").textContent = isLeapYear(appState.year)
+          ? "Año bisiesto (" + totalDaysYear + " días)"
+          : "Año estándar (" + totalDaysYear + " días)";
+
+        document.getElementById("staffTotalBadge").textContent = String(appState.staff.length);
+        document.getElementById("logCounterBadge").textContent = String(appState.novelties.length);
+
+        // Actualizar select de filtro de funcionarios
+        var filterSel = document.getElementById("selectStaffFilter");
+        var filterOpts = '<option value="ALL">Todos los funcionarios (' + appState.staff.length + ")</option>";
+        for (var i = 0; i < appState.staff.length; i++) {
+          var s = appState.staff[i];
+          filterOpts += '<option value="' + s.id + '">' + escapeHtml(s.name) + " (" + (s.role === "titular" ? "Titular" : "Suplente") + ")</option>";
+        }
+        filterSel.innerHTML = filterOpts;
+        filterSel.value = appState.staffFilter;
+
+        // Actualizar tabla modal de funcionarios
+        var modalRows = "";
+        for (var j = 0; j < appState.staff.length; j++) {
+          var st = appState.staff[j];
+          var isSup = st.role === "suplente";
+          modalRows += "<tr>";
+          modalRows += "<td><strong>" + escapeHtml(st.name) + "</strong></td>";
+          modalRows += "<td>" + (isSup ? "Suplente Manual" : "Titular Automático") + "</td>";
+          modalRows += "<td>" + (isSup ? "Manual" : st.startDate) + "</td>";
+          modalRows += "<td><strong>" + (isSup ? "Manual" : st.seed) + "</strong></td>";
+          modalRows += '<td style="display:flex;gap:6px;">';
+          modalRows += '<button type="button" class="btn-mini" data-edit-staff="' + st.id + '">Editar</button>';
+          modalRows += '<button type="button" class="btn btn-rose-soft" style="padding:3px 8px;font-size:11px;" data-del-staff="' + st.id + '">Eliminar</button>';
+          modalRows += "</td></tr>";
+        }
+        document.getElementById("staffModalTableBody").innerHTML = modalRows;
+
+        // Pestañas
+        document.getElementById("tabSheet").classList.toggle("active", appState.activeTab === "sheet");
+        document.getElementById("tabAnnual").classList.toggle("active", appState.activeTab === "annual");
+        document.getElementById("tabLog").classList.toggle("active", appState.activeTab === "log");
+
+        document.getElementById("viewSheet").classList.toggle("hidden", appState.activeTab !== "sheet");
+        document.getElementById("viewAnnual").classList.toggle("hidden", appState.activeTab !== "annual");
+        document.getElementById("viewLog").classList.toggle("hidden", appState.activeTab !== "log");
+
+        if (appState.activeTab === "sheet") {
+          renderSheetView();
+        } else if (appState.activeTab === "annual") {
+          renderAnnualView();
+        } else {
+          renderLogView();
+        }
+      }
+
+      var toastTimeout = null;
+      function showToast(msg) {
+        var el = document.getElementById("toast");
+        el.textContent = msg;
+        el.classList.remove("hide");
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(function () {
+          el.classList.add("hide");
+        }, 2600);
+      }
+
+      function escapeHtml(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      /**
+       * INICIALIZACIÓN Y EVENTOS
+       */
+      function bindEvents() {
+        document.getElementById("inputYear").addEventListener("input", function (e) {
+          var val = parseInt(e.target.value, 10);
+          if (!isNaN(val) && val >= 1900 && val <= 2200) {
+            appState.year = val;
+            saveState();
+            refreshUI();
+          }
+        });
+
+        document.getElementById("btnYearDec").addEventListener("click", function () {
+          if (appState.year > 1900) {
+            appState.year--;
+            saveState();
+            refreshUI();
+          }
+        });
+
+        document.getElementById("btnYearInc").addEventListener("click", function () {
+          if (appState.year < 2200) {
+            appState.year++;
+            saveState();
+            refreshUI();
+          }
+        });
+
+        document.getElementById("selectMonth").addEventListener("change", function (e) {
+          appState.month = parseInt(e.target.value, 10) || 0;
+          saveState();
+          refreshUI();
+        });
+
+        document.getElementById("btnMonthDec").addEventListener("click", function () {
+          if (appState.month === 0) {
+            appState.month = 11;
+            appState.year--;
+          } else {
+            appState.month--;
+          }
+          saveState();
+          refreshUI();
+        });
+
+        document.getElementById("btnMonthInc").addEventListener("click", function () {
+          if (appState.month === 11) {
+            appState.month = 0;
+            appState.year++;
+          } else {
+            appState.month++;
+          }
+          saveState();
+          refreshUI();
+        });
+
+        document.getElementById("selectStaffFilter").addEventListener("change", function (e) {
+          appState.staffFilter = e.target.value;
+          saveState();
+          refreshUI();
+        });
+
+        document.getElementById("tabSheet").addEventListener("click", function () {
+          appState.activeTab = "sheet";
+          saveState();
+          refreshUI();
+        });
+
+        document.getElementById("tabAnnual").addEventListener("click", function () {
+          appState.activeTab = "annual";
+          saveState();
+          refreshUI();
+        });
+
+        document.getElementById("tabLog").addEventListener("click", function () {
+          appState.activeTab = "log";
+          saveState();
+          refreshUI();
+        });
+
+        document.getElementById("inputCutoffDate").addEventListener("change", function (e) {
+          if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) {
+            appState.cutoffDate = e.target.value;
+            saveState();
+            refreshUI();
+            showToast("Fecha de corte actualizada a " + appState.cutoffDate);
+          }
+        });
+
+        document.getElementById("btnSetCutoffToday").addEventListener("click", function () {
+          var now = new Date();
+          appState.cutoffDate = formatISO(now.getFullYear(), now.getMonth(), now.getDate());
+          saveState();
+          refreshUI();
+          showToast("Fecha de corte ajustada a hoy (" + appState.cutoffDate + ")");
+        });
+
+        // Edición rápida inline de fecha de inicio y semilla en sábana
+        document.getElementById("sheetTable").addEventListener("change", function (e) {
+          var dateId = e.target.getAttribute("data-inline-date");
+          var seedId = e.target.getAttribute("data-inline-seed");
+          if (dateId && /^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) {
+            for (var i = 0; i < appState.staff.length; i++) {
+              if (appState.staff[i].id === dateId) {
+                appState.staff[i].startDate = e.target.value;
+                saveState();
+                refreshUI();
+                showToast("Inicio de " + appState.staff[i].name + " actualizado");
+                break;
+              }
+            }
+          } else if (seedId) {
+            for (var j = 0; j < appState.staff.length; j++) {
+              if (appState.staff[j].id === seedId) {
+                appState.staff[j].seed = e.target.value;
+                saveState();
+                refreshUI();
+                showToast("Semilla de " + appState.staff[j].name + " cambiada a " + e.target.value);
+                break;
+              }
+            }
+          }
+        });
+
+        // Delegación global de clics
+        document.addEventListener("click", function (e) {
+          var cell = e.target.closest("[data-cell-staff][data-cell-date]");
+          if (cell) {
+            openNoveltyModal(cell.getAttribute("data-cell-staff"), cell.getAttribute("data-cell-date"));
+            return;
+          }
+
+          var cardBtn = e.target.closest("[data-open-nov-staff]");
+          if (cardBtn) {
+            openNoveltyModal(cardBtn.getAttribute("data-open-nov-staff"), formatISO(appState.year, appState.month, 1));
+            return;
+          }
+
+          var jumpBtn = e.target.closest("[data-jump-month]");
+          if (jumpBtn) {
+            appState.month = parseInt(jumpBtn.getAttribute("data-jump-month"), 10) || 0;
+            appState.activeTab = "sheet";
+            saveState();
+            refreshUI();
+            return;
+          }
+
+          var editSt = e.target.closest("[data-edit-staff]");
+          if (editSt) {
+            var sid = editSt.getAttribute("data-edit-staff");
+            for (var i = 0; i < appState.staff.length; i++) {
+              if (appState.staff[i].id === sid) {
+                var st = appState.staff[i];
+                document.getElementById("staffEditId").value = st.id;
+                document.getElementById("staffNameInp").value = st.name;
+                document.getElementById("staffRoleInp").value = st.role;
+                document.getElementById("staffStartInp").value = st.startDate;
+                document.getElementById("staffSeedInp").value = st.seed === "NONE" ? "RD" : st.seed;
+                document.getElementById("staffCycleFields").classList.toggle("hidden", st.role === "suplente");
+                document.getElementById("staffFormHeading").textContent = "Editando a " + st.name;
+                document.getElementById("btnCancelStaffEdit").classList.remove("hidden");
+                break;
+              }
+            }
+            return;
+          }
+
+          var delSt = e.target.closest("[data-del-staff]");
+          if (delSt) {
+            var did = delSt.getAttribute("data-del-staff");
+            appState.staff = appState.staff.filter(function (x) { return x.id !== did; });
+            appState.novelties = appState.novelties.filter(function (n) { return n.staffId !== did && n.substituteId !== did; });
+            if (appState.staffFilter === did) appState.staffFilter = "ALL";
+            saveState();
+            refreshUI();
+            showToast("Funcionario eliminado");
+            return;
+          }
+
+          var delNov = e.target.closest("[data-del-nov]");
+          if (delNov) {
+            var nid = delNov.getAttribute("data-del-nov");
+            appState.novelties = appState.novelties.filter(function (n) { return n.id !== nid; });
+            saveState();
+            refreshUI();
+            showToast("Novedad eliminada");
+            return;
+          }
+
+          var presetBtn = e.target.closest(".preset-btn");
+          if (presetBtn) {
+            applyPayrollPreset(presetBtn.getAttribute("data-preset"));
+            return;
+          }
+        });
+
+        // Modal Funcionarios
+        document.getElementById("btnOpenStaff").addEventListener("click", function () {
+          document.getElementById("modalStaff").classList.remove("hidden");
+        });
+        document.getElementById("btnCloseStaff").addEventListener("click", function () {
+          document.getElementById("modalStaff").classList.add("hidden");
+        });
+
+        document.getElementById("staffRoleInp").addEventListener("change", function (e) {
+          document.getElementById("staffCycleFields").classList.toggle("hidden", e.target.value === "suplente");
+        });
+
+        function resetStaffForm() {
+          document.getElementById("staffEditId").value = "";
+          document.getElementById("formStaff").reset();
+          document.getElementById("staffStartInp").value = formatISO(appState.year, appState.month, 1);
+          document.getElementById("staffSeedInp").value = "RD";
+          document.getElementById("staffCycleFields").classList.remove("hidden");
+          document.getElementById("staffFormHeading").textContent = "+ Agregar Nuevo Funcionario";
+          document.getElementById("btnCancelStaffEdit").classList.add("hidden");
+        }
+
+        document.getElementById("btnCancelStaffEdit").addEventListener("click", resetStaffForm);
+
+        document.getElementById("formStaff").addEventListener("submit", function (e) {
+          e.preventDefault();
+          var editId = document.getElementById("staffEditId").value;
+          var name = document.getElementById("staffNameInp").value.trim();
+          var role = document.getElementById("staffRoleInp").value;
+          var startDate = document.getElementById("staffStartInp").value || "2026-11-01";
+          var seed = role === "suplente" ? "NONE" : document.getElementById("staffSeedInp").value;
+
+          if (!name) return;
+
+          if (editId) {
+            for (var i = 0; i < appState.staff.length; i++) {
+              if (appState.staff[i].id === editId) {
+                appState.staff[i].name = name;
+                appState.staff[i].role = role;
+                appState.staff[i].startDate = startDate;
+                appState.staff[i].seed = seed;
+                break;
+              }
+            }
+            showToast("Funcionario actualizado");
+          } else {
+            appState.staff.push({
+              id: "st_" + Date.now(),
+              name: name,
+              role: role,
+              startDate: startDate,
+              seed: seed
+            });
+            showToast("Funcionario agregado");
+          }
+
+          resetStaffForm();
+          saveState();
+          refreshUI();
+        });
+
+        // Modal Novedades
+        document.getElementById("btnOpenNovelty").addEventListener("click", function () {
+          openNoveltyModal(null, formatISO(appState.year, appState.month, 1));
+        });
+        document.getElementById("btnLogAddNovelty").addEventListener("click", function () {
+          openNoveltyModal(null, formatISO(appState.year, appState.month, 1));
+        });
+        document.getElementById("btnCloseNovelty").addEventListener("click", function () {
+          document.getElementById("modalNovelty").classList.add("hidden");
+        });
+        document.getElementById("btnCancelNovelty").addEventListener("click", function () {
+          document.getElementById("modalNovelty").classList.add("hidden");
+        });
+
+        document.getElementById("novStaffSel").addEventListener("change", syncNoveltyModalFields);
+        document.getElementById("novDateStart").addEventListener("change", function () {
+          document.getElementById("novDateEnd").value = document.getElementById("novDateStart").value;
+          syncNoveltyModalFields();
+        });
+        document.getElementById("novTypeSel").addEventListener("change", function () {
+          var sid = document.getElementById("novStaffSel").value;
+          var p = null;
+          for (var i = 0; i < appState.staff.length; i++) {
+            if (appState.staff[i].id === sid) p = appState.staff[i];
+          }
+          updateNoveltyModalVisibility(p, document.getElementById("novDateStart").value);
+        });
+
+        document.getElementById("formNovelty").addEventListener("submit", function (e) {
+          e.preventDefault();
+          var staffId = document.getElementById("novStaffSel").value;
+          var startISO = document.getElementById("novDateStart").value;
+          var endISO = document.getElementById("novDateEnd").value || startISO;
+          var note = document.getElementById("novNoteInp").value.trim();
+
+          var person = null;
+          for (var i = 0; i < appState.staff.length; i++) {
+            if (appState.staff[i].id === staffId) person = appState.staff[i];
+          }
+          if (!person || !startISO) return;
+
+          var sp = parseISO(startISO);
+          var ep = parseISO(endISO);
+          var daysSpan = Math.max(0, Math.min(366, diffDaysUTC(ep.y, ep.m, ep.d, sp.y, sp.m, sp.d)));
+
+          for (var offset = 0; offset <= daysSpan; offset++) {
+            var curISO = addDaysISO(startISO, offset);
+            appState.novelties = appState.novelties.filter(function (n) {
+              return !(n.staffId === staffId && n.date === curISO);
+            });
+
+            if (person.role === "suplente") {
+              var supShift = document.getElementById("novSupShiftSel").value;
+              var covId = document.getElementById("novSupCoverSel").value;
+              if (supShift !== "LIBRE") {
+                appState.novelties.push({
+                  id: "nv_" + Date.now() + "_" + offset,
+                  staffId: staffId,
+                  date: curISO,
+                  kind: "MANUAL_SHIFT",
+                  type: "Turno Manual",
+                  substituteId: covId,
+                  manualShift: supShift,
+                  note: note
+                });
+              }
+            } else {
+              var tVal = document.getElementById("novTypeSel").value;
+              if (tVal === "CAMBIO_TURNO") {
+                appState.novelties.push({
+                  id: "nv_" + Date.now() + "_" + offset,
+                  staffId: staffId,
+                  date: curISO,
+                  kind: "SHIFT_OVERRIDE",
+                  type: "CAMBIO_TURNO",
+                  substituteId: "",
+                  manualShift: document.getElementById("novTitularShiftSel").value,
+                  note: note
+                });
+              } else if (tVal !== "NORMAL") {
+                appState.novelties.push({
+                  id: "nv_" + Date.now() + "_" + offset,
+                  staffId: staffId,
+                  date: curISO,
+                  kind: "ABSENCE",
+                  type: tVal,
+                  substituteId: document.getElementById("novSubSel").value,
+                  manualShift: "",
+                  note: note
+                });
+              }
+            }
+          }
+
+          saveState();
+          document.getElementById("modalNovelty").classList.add("hidden");
+          refreshUI();
+          showToast("Programación actualizada");
+        });
+
+        document.getElementById("btnDeleteNovelty").addEventListener("click", function () {
+          var staffId = document.getElementById("novStaffSel").value;
+          var dISO = document.getElementById("novDateStart").value;
+          appState.novelties = appState.novelties.filter(function (n) {
+            return !(n.staffId === staffId && n.date === dISO);
+          });
+          saveState();
+          document.getElementById("modalNovelty").classList.add("hidden");
+          refreshUI();
+          showToast("Registro eliminado");
+        });
+
+        // Modal Nómina CSV
+        document.getElementById("btnOpenPayroll").addEventListener("click", function () {
+          var sel = document.getElementById("payStaffSel");
+          var opts = '<option value="ALL">Todos los funcionarios (' + appState.staff.length + ")</option>";
+          for (var i = 0; i < appState.staff.length; i++) {
+            opts += '<option value="' + appState.staff[i].id + '">' + escapeHtml(appState.staff[i].name) + "</option>";
+          }
+          sel.innerHTML = opts;
+          sel.value = appState.staffFilter;
+
+          var cp = parseISO(appState.cutoffDate);
+          if (appState.year === cp.y && appState.month === cp.m) {
+            applyPayrollPreset("CURRENT_TODAY");
+          } else {
+            applyPayrollPreset("SELECTED_MONTH");
+          }
+          document.getElementById("modalPayroll").classList.remove("hidden");
+        });
+
+        document.getElementById("btnClosePayroll").addEventListener("click", function () {
+          document.getElementById("modalPayroll").classList.add("hidden");
+        });
+
+        document.getElementById("payStartInp").addEventListener("change", renderPayrollPreview);
+        document.getElementById("payEndInp").addEventListener("change", renderPayrollPreview);
+        document.getElementById("payStaffSel").addEventListener("change", renderPayrollPreview);
+
+        document.getElementById("btnDownloadNoveltiesCSV").addEventListener("click", function () {
+          var d = buildPayrollData();
+          var csv = "Periodo Desde;Periodo Hasta;Fecha;Dia Semana;Funcionario;Turno Base;Tipo Novedad;Suplente / Turno Asignado;Observacion\n";
+          if (d.novelties.length === 0) {
+            csv += d.startISO + ";" + d.endISO + ";Sin novedades en este periodo;;;;;;\n";
+          } else {
+            for (var i = 0; i < d.novelties.length; i++) {
+              var n = d.novelties[i];
+              var cleanObs = String(n.obs || "").replace(/;/g, ",").replace(/\r?\n/g, " ");
+              csv += d.startISO + ";" + d.endISO + ";" + n.date + ";" + n.dayName + ";" + n.funcionario + ";" + n.baseShift + ";" + n.tipo + ";" + n.suplente + ";" + cleanObs + "\n";
+            }
+          }
+          triggerCSVDownload(csv, "Nomina_Novedades_" + d.startISO + "_a_" + d.endISO + ".csv");
+          showToast("CSV de Novedades descargado");
+        });
+
+        document.getElementById("btnDownloadSummaryCSV").addEventListener("click", function () {
+          var d = buildPayrollData();
+          var csv = "Periodo Desde;Periodo Hasta;Dias Evaluados;Funcionario;Rol;Dias (D);Noches (N);Descansos (R);Total Laborados (D+N);Permisos y Licencias;Vacaciones;Incapacidades;Turnos Cubiertos Suplente\n";
+          for (var i = 0; i < d.summaries.length; i++) {
+            var r = d.summaries[i];
+            var m = r.metrics;
+            csv += d.startISO + ";" + d.endISO + ";" + d.daysCount + ";" + r.person.name + ";" + r.person.role + ";" + m.cD + ";" + m.cN + ";" + m.cR + ";" + m.worked + ";" + m.permisos + ";" + m.vacaciones + ";" + m.incapacidades + ";" + m.suplencias + "\n";
+          }
+          triggerCSVDownload(csv, "Nomina_Consolidado_" + d.startISO + "_a_" + d.endISO + ".csv");
+          showToast("CSV Consolidado descargado");
+        });
+
+        // Imprimir y Reiniciar
+        document.getElementById("btnPrint").addEventListener("click", function () {
+          window.print();
+        });
+
+        document.getElementById("btnResetAll").addEventListener("click", function () {
+          appState = getDefaultState();
+          saveState();
+          refreshUI();
+          showToast("Datos iniciales restaurados (Danilo, Vicente, STEFANY, ANDRES)");
+        });
+      }
+
+      function init() {
+        try {
+          appState = loadState();
+          bindEvents();
+          refreshUI();
+        } catch (err) {
+          appState = getDefaultState();
+          saveState();
+          bindEvents();
+          refreshUI();
+        }
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+</body>
+</html>
